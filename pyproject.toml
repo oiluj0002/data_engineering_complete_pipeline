@@ -6,4 +6,15 @@ readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
     "pandas>=2.3.3",
+    "psycopg>=3.2.12",
+    "sqlalchemy>=2.0.44",
+]
+
+[dependency-groups]
+dev = [
+    "pyright>=1.1.407",
+    "pytest>=8.4.2",
+    "pytest-mock>=3.15.1",
+    "python-dotenv>=1.2.1",
+    "ruff>=0.14.2",
 ]
