@@ -5,13 +5,17 @@ description = "SQL Extract Load Script"
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
+    "boto3>=1.40.61",
     "pandas>=2.3.3",
     "psycopg>=3.2.12",
+    "pyarrow>=22.0.0",
     "sqlalchemy>=2.0.44",
 ]
 
 [dependency-groups]
 dev = [
+    "boto3-stubs[essential]>=1.40.61",
+    "pyarrow-stubs>=20.0.0.20250928",
     "pyright>=1.1.407",
     "pytest>=8.4.2",
     "pytest-mock>=3.15.1",

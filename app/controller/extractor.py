@@ -9,11 +9,13 @@ logger = get_logger()
 
 class SQLExtractor:
     """
-    Extracts data from a SQL database table in incremental chunks.
+    Extracts data from a SQL table in incremental chunks.
 
-    This class connects to a SQL database using a SQLAlchemy engine
-    and yields data in pandas DataFrames, suitable for processing large tables
-    without loading the entire dataset into memory.
+    This class connects to a SQL database using a SQLAlchemy engine and yields
+    data in pandas DataFrames, suitable for processing large tables without
+    loading the entire dataset into memory. The query and parameters are
+    written to be friendly with PostgreSQL (and other SQLAlchemy-supported
+    databases).
     """
 
     def __init__(
@@ -29,7 +31,7 @@ class SQLExtractor:
         Initializes the SQLExtractor.
 
         Args:
-            engine: An authenticated SQLAlchemy engine instance for the SQL database.
+            engine: An authenticated SQLAlchemy engine instance for the target SQL database.
             columns_to_select: List of columns to use in select query.
             schema_name: The name of the database schema.
             table_name: The name of the table to extract data from.
@@ -43,26 +45,25 @@ class SQLExtractor:
         self.cursor_column = cursor_column
         self.chunk_size = chunk_size
 
-    def _build_incremental_query(self, last_cursor: str) -> str:
+    def _build_incremental_query(self) -> str:
         """
-        Builds the SQL query for incremental data extraction.
+        Builds a parameterized SQL query for incremental data extraction.
 
-        This private method constructs a query that selects all new rows
-        from the source table based on a cursor value.
+        The query selects rows where the cursor column is greater than the bound
+        parameter and orders results ascending by the cursor column.
 
-        Args:
-            last_cursor: The last recorded value of the cursor column, used to
-                         fetch only newer records.
+        Uses SQLAlchemy-style named parameters (e.g., :last_cursor), which are
+        compiled appropriately per dialect (friendly for PostgreSQL).
 
         Returns:
-            A string containing the complete SQL query.
+            The SQL query string with a single named parameter (:last_cursor).
         """
-        columns = ", ".join(f'"{c}"' for c in self.columns_to_select)
+        columns = ", ".join(self.columns_to_select)
 
         query = f"""
             SELECT {columns}
             FROM {self.schema_name}.{self.table_name}
-            WHERE {self.cursor_column} > '{last_cursor}'
+            WHERE {self.cursor_column} > :last_cursor
             ORDER BY {self.cursor_column} ASC
             """
         return query
@@ -82,7 +83,7 @@ class SQLExtractor:
         Yields:
             A pandas DataFrame for each chunk of data fetched from the database.
         """
-        query = self._build_incremental_query(last_cursor)
+        query = self._build_incremental_query()
 
         logger.info(
             f"Starting to extract chunks from table: '{self.table_name}' using column: '{self.cursor_column}' as cursor"
@@ -90,7 +91,10 @@ class SQLExtractor:
         with self.engine.connect() as conn:
             try:
                 chunk_iterator = pd.read_sql(
-                    sql=query, con=conn, chunksize=self.chunk_size
+                    sql=query,
+                    con=conn,
+                    params={"last_cursor": last_cursor},
+                    chunksize=self.chunk_size,
                 )
 
                 for i, chunk in enumerate(chunk_iterator, 1):

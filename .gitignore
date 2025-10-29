@@ -4,9 +4,38 @@ __pycache__/
 build/
 dist/
 wheels/
-*.egg-info
+*.egg-info/
 
 # Virtual environments
-.venv
+.venv/
 
+# IDE-specific files
 .vscode/
+
+# Environment variables
+# Ignore all .env files, like secret/.env
+**/.env
+
+# --- LocalStack ---
+# Ignore LocalStack's persistent data volume
+localstack/volume/
+# Ignore local LocalStack credentials if they are in the project folder
+localstack/.aws/
+
+# --- Terraform ---
+# Ignore Terraform's working directory (plugins, modules)
+.terraform/
+# Ignore Terraform state files (can contain secrets)
+*.tfstate
+*.tfstate.backup
+# Ignore local variable files (standard for secrets)
+*.tfvars
+
+# --- Python Testing and Logs ---
+# Pytest cache
+.pytest_cache/
+# Test coverage reports
+.coverage
+htmlcov/
+# Application-generated log files
+*.log
