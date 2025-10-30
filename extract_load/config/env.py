@@ -4,7 +4,7 @@ try:
     # Load variables from a .env file when available (no hard dependency in prod)
     from dotenv import load_dotenv
 
-    load_dotenv()
+    load_dotenv("extract_load/secret/.env")
 except ImportError:
     pass
 
@@ -14,8 +14,9 @@ _REQUIRED_VARS = [
     "DB_HOST",
     "DB_PORT",
     "DB_NAME",
-    "GCP_PROJECT_ID",
-    "GCS_BUCKET_NAME",
+    "AWS_ACCESS_KEY_ID",
+    "AWS_SECRET_ACCESS_KEY",
+    "AWS_ENDPOINT_URL",
 ]
 
 _missing = [name for name in _REQUIRED_VARS if not os.getenv(name)]
@@ -31,10 +32,7 @@ DB_HOST = os.environ["DB_HOST"]
 DB_PORT = int(os.environ["DB_PORT"])
 DB_NAME = os.environ["DB_NAME"]
 
-# --- GCP ---
-GCP_PROJECT_ID = os.environ["GCP_PROJECT_ID"]
-GCS_BUCKET_NAME = os.environ["GCS_BUCKET_NAME"]
-
-# --- Extraction Values with Defaults ---
-EXECUTION_TS = os.getenv("EXECUTION_TS", "1900-01-01 00:00:00.000000")
-CLOUD_RUN_TASK_INDEX = int(os.getenv("CLOUD_RUN_TASK_INDEX", "0"))
+# --- AWS ---
+AWS_ACCESS_KEY_ID = os.environ["AWS_ACCESS_KEY_ID"]
+AWS_SECRET_ACCESS_KEY = os.environ["AWS_SECRET_ACCESS_KEY"]
+AWS_ENDPOINT_URL = os.environ["AWS_ENDPOINT_URL"]
