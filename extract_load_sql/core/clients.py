@@ -27,7 +27,7 @@ def get_db_engine() -> Engine:
             password=env.DB_PASSWORD,
             host=env.DB_HOST,
             port=5432,
-            database=env.DB_NAME
+            database=env.DB_NAME,
         )
 
         engine = create_engine(connection_url, poolclass=NullPool)
@@ -37,6 +37,7 @@ def get_db_engine() -> Engine:
     except Exception as e:
         logger.error(f"Failed to create database engine. Error: {e}")
         raise
+
 
 def get_s3_client() -> S3Client:
     """
@@ -53,10 +54,10 @@ def get_s3_client() -> S3Client:
 
     try:
         s3_client = client(
-            's3',
+            "s3",
             aws_access_key_id=env.AWS_ACCESS_KEY_ID,
             aws_secret_access_key=env.AWS_SECRET_ACCESS_KEY,
-            endpoint_url=env.AWS_ENDPOINT_URL
+            endpoint_url=env.AWS_ENDPOINT_URL,
         )
         logger.info("S3 client created successfully.")
         return s3_client

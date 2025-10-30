@@ -26,13 +26,13 @@ services:
     depends_on:
       - localstack
 
-  elt-job:
-    image: elt-job-test:latest
+  elt-job-sql:
+    image: elt-job-sql-test:latest
     build:
       context: .
       dockerfile: Dockerfile
     env_file:
-      - ./extract_load/secret/.env
+      - ./extract_load_sql/secret/.env
     depends_on:
       - localstack
 

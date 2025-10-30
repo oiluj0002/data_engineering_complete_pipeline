@@ -3,12 +3,25 @@ import io
 import uuid
 
 from utils.logger import get_logger
-from core.clients import (get_db_engine, get_s3_client)
+from core.clients import get_db_engine, get_s3_client
 
 logger = get_logger()
 
 
 def extract_table(schema: str, table: str) -> pd.DataFrame:
+    """
+    Extract all rows from a database table into a pandas DataFrame.
+
+    Args:
+        schema: Database schema name (e.g., "public").
+        table: Table name (e.g., "wallets").
+
+    Returns:
+        A pandas DataFrame with the query results from {schema}.{table}.
+
+    Raises:
+        Exception: If a connection or query execution error occurs.
+    """
     engine = get_db_engine()
     query = f"SELECT * FROM {schema}.{table};"
 
@@ -21,7 +34,20 @@ def extract_table(schema: str, table: str) -> pd.DataFrame:
             logger.error(f"Error extracting data from {schema}.{table}: {e}")
             raise
 
+
 def transform(data: pd.DataFrame) -> pd.DataFrame:
+    """
+    Apply lightweight transformations to ensure Parquet compatibility.
+
+    Currently converts object-typed columns that contain UUID values to strings
+    to avoid pyarrow dtype inference issues when writing Parquet.
+
+    Args:
+        data: The original DataFrame extracted from the source database.
+
+    Returns:
+        A new, transformed DataFrame.
+    """
     df = data.copy()
 
     # Convert UUID-typed object columns to string
@@ -34,19 +60,37 @@ def transform(data: pd.DataFrame) -> pd.DataFrame:
     logger.info("Transforming data")
     return df
 
+
 def upload_to_s3(bucket: str, key: str, data: pd.DataFrame) -> None:
+    """
+    Upload a DataFrame to S3 as Parquet (snappy) using a BytesIO buffer.
+
+    Args:
+        bucket: Target S3 bucket name.
+        key: Object key/path within the bucket (e.g., "data/wallets.parquet").
+        data: The DataFrame to persist.
+
+    Returns:
+        None
+
+    Raises:
+        Exception: If an error occurs while sending the object to S3.
+    """
     s3_client = get_s3_client()
-    
+
     buffer = io.BytesIO()
     data.to_parquet(path=buffer, engine="pyarrow", compression="snappy", index=False)
     buffer.seek(0)
 
     try:
-        s3_client.put_object(Bucket=bucket, Key=key, Body=buffer, ContentType="application/octet-stream")
+        s3_client.put_object(
+            Bucket=bucket, Key=key, Body=buffer, ContentType="application/octet-stream"
+        )
         logger.info(f"Uploaded data to s3://{bucket}/{key}")
     except Exception as e:
         logger.error(f"Error uploading data to s3://{bucket}/{key}: {e}")
         raise
+
 
 if __name__ == "__main__":
     schema_name = "public"

@@ -13,8 +13,12 @@ wheels/
 .vscode/
 
 # Environment variables
-# Ignore all .env files, like secret/.env
-**/.env
+# Ignore all .env* files, like .env, .env.local, secret/.env.dev
+**/.env*
+# Keep example env templates
+!.env.example
+!**/.env.example
+!**/.env.*.example
 
 # --- LocalStack ---
 # Ignore LocalStack's persistent data volume
@@ -30,12 +34,56 @@ localstack/.aws/
 *.tfstate.backup
 # Ignore local variable files (standard for secrets)
 *.tfvars
+*.tfvars.json
+*.auto.tfvars
+# Ignore Terraform crash logs
+crash.log
+crash.*.log
 
 # --- Python Testing and Logs ---
 # Pytest cache
 .pytest_cache/
 # Test coverage reports
 .coverage
+.coverage.*
+coverage.xml
 htmlcov/
 # Application-generated log files
 *.log
+
+# --- Python Tooling Caches ---
+.mypy_cache/
+.ruff_cache/
+.pyre/
+.pytype/
+.tox/
+.nox/
+__pypackages__/
+
+# Python version managers
+.python-version
+
+# Additional virtual environments
+venv/
+env/
+
+# Notebooks
+.ipynb_checkpoints/
+
+# Editors/OS files
+.idea/
+.DS_Store
+*.swp
+*.swo
+
+# VS Code local history (optional)
+.history/
+
+# --- Docker / Compose ---
+# Developer-specific overrides
+docker-compose.override.yml
+
+# --- Astro / Airflow ---
+# Astro-generated working directory and logs
+astro/.astro/
+astro/logs/
