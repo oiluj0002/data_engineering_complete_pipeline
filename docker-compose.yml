@@ -14,6 +14,7 @@ services:
       - "/var/run/docker.sock:/var/run/docker.sock"
 
   localstack-tools:
+    image: localstack-tools:latest
     build:
       context: ./localstack/tools
       dockerfile: Dockerfile
@@ -29,7 +30,7 @@ services:
   elt-job-sql:
     image: elt-job-sql-test:latest
     build:
-      context: .
+      context: ./extract_load_sql
       dockerfile: Dockerfile
     env_file:
       - ./extract_load_sql/secret/.env

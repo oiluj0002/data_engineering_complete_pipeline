@@ -71,4 +71,4 @@ tools-shell:
 
 .PHONY: elt-run
 elt-run:
-	$(DC) run --rm elt-job
+	$(DC) run --rm elt-job-sql
